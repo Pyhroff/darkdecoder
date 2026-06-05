@@ -54,20 +54,44 @@ Required JSON structure:
 
 
 def analyze_redteam(code: str) -> dict:
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Perform red team analysis on this code:\n\n```\n{code}\n```"}
-        ],
-        temperature=0.15,
-        max_tokens=4096,
-    )
-    raw = response.choices[0].message.content.strip()
-    if raw.startswith("```json"):
-        raw = raw[7:]
-    elif raw.startswith("```"):
-        raw = raw[3:]
-    if raw.endswith("```"):
-        raw = raw[:-3]
-    return json.loads(raw.strip())
+    code = code[:15000]
+    last_error = None
+
+    for attempt in range(3):
+        try:
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": f"Perform red team analysis on this code:\n\n```\n{code}\n```"}
+                ],
+                temperature=0.15,
+                max_tokens=4096,
+                timeout=30,
+            )
+            raw = response.choices[0].message.content.strip()
+            if raw.startswith("```json"):
+                raw = raw[7:]
+            elif raw.startswith("```"):
+                raw = raw[3:]
+            if raw.endswith("```"):
+                raw = raw[:-3]
+            return json.loads(raw.strip())
+
+        except json.JSONDecodeError:
+            last_error = "Response parsing error"
+            continue
+        except Exception as e:
+            err = str(e)
+            if "rate_limit" in err.lower() or "429" in err:
+                raise RuntimeError("Rate limit reached. Please wait 30 seconds and try again.")
+            if "timeout" in err.lower():
+                raise RuntimeError("Request timed out. Please try again.")
+            if "api_key" in err.lower() or "authentication" in err.lower():
+                raise RuntimeError("Invalid API key. Check your GROQ_API_KEY in .env file.")
+            last_error = err
+            if attempt < 2:
+                continue
+            raise RuntimeError(f"Analysis failed: {last_error}")
+
+    raise RuntimeError(f"Analysis failed after retries: {last_error}")

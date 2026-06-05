@@ -1,50 +1,66 @@
 # 💀 DarkDecoder — Dual-Framework Cyber Threat Intelligence Platform
 
-> Paste suspicious code. Get instant threat intelligence. Powered by Groq AI.
+> Paste suspicious code. Get instant threat intelligence in 20 seconds.
 
-Built for **Beyond Tomorrow Summit Hackathon 2026**.
-
----
-
-## What it does
-
-DarkDecoder is a dual-framework AI-powered threat intelligence platform with three analysis modules:
-
-### ⚠️ Malware Scanner — MITRE ATT&CK
-- **Deobfuscation** — decodes base64, hex, eval chains, string concatenation
-- **Intent Classification** — Ransomware, Keylogger, Reverse Shell, Cryptominer, etc.
-- **Danger Scoring** — 1–10 risk rating with justification
-- **MITRE ATT&CK Mapping** — maps behavior to official framework techniques
-- **IOC Extraction** — IPs, domains, URLs, file paths, registry keys, mutexes
-- **Plain English Summary** — explains the threat to non-technical stakeholders
-- **Remediation Steps** — actionable defensive guidance
-
-### 🤖 AI Threat Analyzer — MITRE ATLAS
-- **Prompt Injection Detection** — identifies LLM hijacking attempts
-- **Jailbreak Analysis** — detects safety guardrail bypass techniques
-- **Data Poisoning Detection** — spots malicious training data samples
-- **Model Extraction Detection** — identifies model stealing query patterns
-- **ATLAS Technique Mapping** — maps to AML.TXXXX framework codes
-
-### 🔴 Red Team Intel — Kill Chain
-- **Weaponization Scoring** — Script Kiddie vs APT-Grade assessment
-- **Kill Chain Grid** — 10-phase ATT&CK grid showing active attack phases
-- **Privilege Escalation Analysis** — None → Local → Admin → SYSTEM/Root
-- **Stealth & Detection Scoring** — how hard to detect this in the wild
-- **Attack Narrative** — how a real APT would use this in a campaign
-- **CVSS Vector** — standard vulnerability scoring string
-- **APT Group Similarity** — named threat actors using similar techniques
+Built for **Beyond Tomorrow Summit Hackathon 2026** · [github.com/Pyhroff/darkdecoder](https://github.com/Pyhroff/darkdecoder)
 
 ---
 
-## Stack
+## What It Does
 
-- **AI Engine**: Llama 3.3 70B (Groq API)
-- **Frameworks**: MITRE ATT&CK + MITRE ATLAS
-- **Backend**: Python
-- **Frontend**: Streamlit
-- **PDF Generation**: fpdf2
-- **Auth**: python-dotenv
+DarkDecoder is a **dual-framework AI-powered threat intelligence platform** with three analysis modules:
+
+### ⚠️ Module 1 — Malware Scanner (MITRE ATT&CK)
+- Deobfuscates base64, hex, eval chains, string concatenation
+- Classifies malware type: Ransomware, Keylogger, Reverse Shell, Cryptominer, etc.
+- Danger score 1–10 with full justification
+- Maps to MITRE ATT&CK techniques (T-codes)
+- Extracts IOCs: IPs, domains, URLs, file paths, registry keys, mutexes
+- Plain English summary for non-technical stakeholders
+- Actionable remediation steps
+
+### 🤖 Module 2 — AI Threat Analyzer (MITRE ATLAS)
+- Detects prompt injection attacks against LLM systems
+- Identifies jailbreak and safety guardrail bypass techniques
+- Catches training data poisoning samples
+- Flags model extraction query patterns
+- Maps to MITRE ATLAS AML.TXXXX codes — the official AI threat framework
+
+### 🔴 Module 3 — Red Team Intel (ATT&CK Kill Chain)
+- 10-phase ATT&CK kill chain grid visualization
+- Weaponization score + stealth rating (1–10)
+- Privilege escalation level: None → Local → Admin → SYSTEM/Root
+- Detection difficulty assessment
+- Named APT group similarity matching
+- CVSS vector string generation
+- Full attack narrative from an APT perspective
+
+---
+
+## Features
+
+| Feature | Details |
+|---|---|
+| File Upload | .py .js .php .ps1 .sh .bat .rb .go .cs .vbs |
+| Report Export | PDF · JSON · TXT (one click) |
+| Attack Timeline | Numbered progression with MITRE technique IDs |
+| Session History | All scans logged with timestamps in sidebar |
+| Hash Analysis | SHA256 + MD5 computed on every submission |
+| Onboarding | Sample code buttons for instant demo |
+
+---
+
+## Tech Stack
+
+| Component | Technology |
+|---|---|
+| AI Engine | Groq API — Llama 3.3 70B (70B parameter LLM) |
+| Threat Framework 1 | MITRE ATT&CK (Traditional threats) |
+| Threat Framework 2 | MITRE ATLAS (AI/ML adversarial threats) |
+| Backend | Python 3.10+ |
+| Frontend | Streamlit |
+| PDF Generation | fpdf2 |
+| Environment | python-dotenv |
 
 ---
 
@@ -59,54 +75,34 @@ cd darkdecoder
 pip install -r requirements.txt
 
 # 3. Add your API key
-echo "GROQ_API_KEY=your_key_here" > .env
+cp .env.example .env
+# Edit .env and add your Groq API key
 
 # 4. Run
 streamlit run app.py
 ```
 
-Get a free Groq API key at **console.groq.com** — no credit card required.
+**Get a free Groq API key at [console.groq.com](https://console.groq.com)** — no credit card required. Free tier: 14,400 requests/day.
 
 ---
 
-## Features
+## Demo Samples (Built-in)
 
-| Feature | Module |
-|---|---|
-| Malware deobfuscation | Malware Scanner |
-| MITRE ATT&CK mapping | Malware Scanner |
-| IOC extraction | Malware Scanner |
-| Prompt injection detection | AI Threat Analyzer |
-| MITRE ATLAS mapping | AI Threat Analyzer |
-| Kill chain visualization | Red Team Intel |
-| Attack timeline | All modules |
-| File upload (.py .js .php .ps1 .sh) | All modules |
-| PDF / JSON / TXT report export | All modules |
-| Scan history + session stats | Sidebar |
-| SHA256 / MD5 hash analysis | Malware Scanner |
+**Malware Scanner:** PowerShell Dropper · Python Reverse Shell · JS Cryptominer · PHP Webshell · Ransomware Stub
+
+**AI Threat Analyzer:** Prompt Injection · Data Poisoning · Model Extraction · Jailbreak Attempt
+
+**Red Team Intel:** Privilege Escalation · Lateral Movement · Defense Evasion · C2 Beacon
 
 ---
 
-## Demo Samples
+## Why DarkDecoder Is Different
 
-**Malware Scanner:**
-- PowerShell encoded dropper
-- Python reverse shell
-- JavaScript cryptominer
-- PHP webshell
-- Ransomware stub
-
-**AI Threat Analyzer:**
-- Prompt injection attack
-- Data poisoning sample
-- Model extraction attempt
-- Jailbreak attempt
-
-**Red Team Intel:**
-- Privilege escalation
-- Lateral movement
-- Defense evasion
-- C2 beacon
+- **Only tool** combining MITRE ATT&CK + MITRE ATLAS in a single platform
+- **Explains WHY** code is dangerous, not just flags it
+- **Red team perspective** — full kill chain analysis available free
+- **AI-specific threat detection** — prompt injection, jailbreaks, data poisoning
+- **Deployable for $0** — Groq free tier, no cloud infrastructure needed
 
 ---
 

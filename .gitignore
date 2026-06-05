@@ -1,11 +1,31 @@
+# API Keys - NEVER commit
 .env
+*.env
+.env.local
+.env.production
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
-.venv/
-venv/
-env/
+*.pyd
+.Python
 *.egg-info/
 dist/
 build/
+.venv/
+venv/
+env/
+
+# Streamlit
 .streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
