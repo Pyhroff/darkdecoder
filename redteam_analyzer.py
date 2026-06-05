@@ -45,7 +45,11 @@ Required JSON structure:
     "specific defensive countermeasure 3",
     "specific defensive countermeasure 4"
   ],
-  "similar_threat_actors": ["known APT group or threat actor that uses similar techniques"]
+  "similar_threat_actors": ["known APT group or threat actor that uses similar techniques"],
+  "attack_timeline": [
+    {"step": 1, "phase": "Phase Name", "action": "What the attacker does at this step", "technique_id": "TXXXX"},
+    {"step": 2, "phase": "Phase Name", "action": "What happens next in the campaign", "technique_id": "TXXXX"}
+  ]
 }"""
 
 
