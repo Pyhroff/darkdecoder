@@ -47,24 +47,54 @@ If code appears benign, set danger_score to 1 and classification to "Benign".
 Always extract every IOC you can find."""
 
 
-def analyze_code(code: str) -> dict:
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Analyze this code and return structured JSON:\n\n```\n{code}\n```"}
-        ],
-        temperature=0.2,
-        max_tokens=4096,
-    )
+def _sanitize_input(code: str) -> str:
+    """Strip any attempt to inject instructions into the analyzer prompt."""
+    code = code[:15000]  # Hard cap at 15k chars
+    return code
 
-    raw = response.choices[0].message.content.strip()
-
+def _parse_json(raw: str) -> dict:
+    raw = raw.strip()
     if raw.startswith("```json"):
         raw = raw[7:]
     elif raw.startswith("```"):
         raw = raw[3:]
     if raw.endswith("```"):
         raw = raw[:-3]
-
     return json.loads(raw.strip())
+
+def analyze_code(code: str) -> dict:
+    code = _sanitize_input(code)
+    last_error = None
+
+    for attempt in range(3):
+        try:
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": f"Analyze this code and return structured JSON:\n\n```\n{code}\n```"}
+                ],
+                temperature=0.2,
+                max_tokens=4096,
+                timeout=30,
+            )
+            raw = response.choices[0].message.content
+            return _parse_json(raw)
+
+        except json.JSONDecodeError as e:
+            last_error = f"Response parsing error (attempt {attempt+1}/3): {e}"
+            continue
+        except Exception as e:
+            err = str(e)
+            if "rate_limit" in err.lower() or "429" in err:
+                raise RuntimeError("Rate limit reached. Please wait 30 seconds and try again.")
+            if "timeout" in err.lower() or "timed out" in err.lower():
+                raise RuntimeError("Request timed out. Groq may be busy — please try again.")
+            if "api_key" in err.lower() or "authentication" in err.lower():
+                raise RuntimeError("Invalid API key. Please check your GROQ_API_KEY in the .env file.")
+            last_error = err
+            if attempt < 2:
+                continue
+            raise RuntimeError(f"Analysis failed after 3 attempts: {last_error}")
+
+    raise RuntimeError(f"Analysis failed: {last_error}")

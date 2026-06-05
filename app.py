@@ -283,13 +283,16 @@ with tab1:
         sha = hashlib.sha256(code_input.encode()).hexdigest()
         st.markdown(f'<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:#00ff4145;padding:0.35rem 0.6rem;background:#000d03;border-left:2px solid #00ff4120;margin-bottom:0.5rem">MD5: {md5} &nbsp;·&nbsp; SHA256: {sha[:40]}... &nbsp;·&nbsp; {len(code_input.encode())}B</div>', unsafe_allow_html=True)
 
+    st.markdown('<div style="color:#00ff4130;font-size:0.68rem;letter-spacing:0.08em;margin-bottom:0.5rem">💡 Try a sample above, or paste any suspicious code. Supports obfuscated PowerShell, Python, PHP, JS, Bash and more.</div>', unsafe_allow_html=True)
+
     if st.button("[ INITIATE MALWARE SCAN ]", key="run_mal"):
         if not code_input.strip():
-            st.warning("// no code provided")
+            st.warning("// No code detected. Paste suspicious code above or click a sample button.")
         else:
-            with st.spinner("// running static analysis engine..."):
+            with st.spinner("// Running static analysis engine — this takes 10–20 seconds..."):
                 try: result = analyze_code(code_input)
-                except Exception as e: st.error(f"// scan failed: {e}"); st.stop()
+                except RuntimeError as e: st.error(f"⚠️ {e}"); st.stop()
+                except Exception as e: st.error(f"⚠️ Unexpected error. Please try again.\n\nDetails: {e}"); st.stop()
 
             score = result.get("danger_score",0)
             sc,sg,label = score_meta(score)
@@ -446,13 +449,16 @@ with tab2:
         st.markdown('<div style="color:#00ff4150;font-size:0.68rem;letter-spacing:0.15em;margin:0.7rem 0 0.3rem">▸ INPUT TYPE</div>', unsafe_allow_html=True)
         hint = st.selectbox("type", ["auto-detect","Prompt / User Message","System Prompt","Training Data Sample","Model Query Log","API Response"], label_visibility="collapsed", key="ai_type")
 
+    st.markdown('<div style="color:#00ff4130;font-size:0.68rem;letter-spacing:0.08em;margin-bottom:0.5rem">💡 Paste a prompt, user message, training data sample, or model query. Use sample buttons above for quick demo.</div>', unsafe_allow_html=True)
+
     if st.button("[ INITIATE ATLAS SCAN ]", key="run_ai"):
         if not ai_input.strip():
-            st.warning("// no input provided")
+            st.warning("// No input detected. Paste a prompt or click a sample button.")
         else:
-            with st.spinner("// running MITRE ATLAS analysis engine..."):
+            with st.spinner("// Running MITRE ATLAS analysis engine — 10–20 seconds..."):
                 try: result = analyze_ai_threat(ai_input, hint)
-                except Exception as e: st.error(f"// scan failed: {e}"); st.stop()
+                except RuntimeError as e: st.error(f"⚠️ {e}"); st.stop()
+                except Exception as e: st.error(f"⚠️ Unexpected error. Please try again.\n\nDetails: {e}"); st.stop()
 
             score = result.get("threat_level",0)
             sc,sg,label = score_meta(score)
@@ -571,13 +577,16 @@ with tab3:
                              value=uploaded_rt if uploaded_rt else st.session_state.get("rt_sample",""),
                              placeholder="// paste code to analyze from offensive perspective...", height=180, key="rt_code")
 
+    st.markdown('<div style="color:#ff404030;font-size:0.68rem;letter-spacing:0.08em;margin-bottom:0.5rem">💡 Paste any code to analyze from an attacker\'s perspective. Best with privilege escalation, lateral movement, or C2 code.</div>', unsafe_allow_html=True)
+
     if st.button("[ INITIATE RED TEAM ANALYSIS ]", key="run_rt"):
         if not rt_input.strip():
-            st.warning("// no code provided")
+            st.warning("// No code detected. Paste code or click a sample button.")
         else:
-            with st.spinner("// running kill chain analysis..."):
+            with st.spinner("// Running kill chain analysis — 10–20 seconds..."):
                 try: result = analyze_redteam(rt_input)
-                except Exception as e: st.error(f"// analysis failed: {e}"); st.stop()
+                except RuntimeError as e: st.error(f"⚠️ {e}"); st.stop()
+                except Exception as e: st.error(f"⚠️ Unexpected error. Please try again.\n\nDetails: {e}"); st.stop()
 
             score = result.get("weaponization_score",0)
             sc,sg,label = score_meta(score)
