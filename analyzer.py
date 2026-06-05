@@ -36,6 +36,10 @@ Required JSON structure:
     "Actionable step 1",
     "Actionable step 2",
     "Actionable step 3"
+  ],
+  "attack_timeline": [
+    {"step": 1, "phase": "Phase Name", "action": "What happens at this step", "technique_id": "TXXXX"},
+    {"step": 2, "phase": "Phase Name", "action": "What happens next", "technique_id": "TXXXX"}
   ]
 }
 

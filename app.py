@@ -3,6 +3,7 @@ import json, hashlib, datetime
 from analyzer import analyze_code
 from ai_analyzer import analyze_ai_threat
 from redteam_analyzer import analyze_redteam
+from report_generator import generate_malware_pdf, generate_redteam_pdf, generate_ai_pdf
 
 st.set_page_config(page_title="DarkDecoder", page_icon="💀", layout="wide", initial_sidebar_state="expanded")
 
@@ -181,6 +182,56 @@ tab1, tab2, tab3 = st.tabs([
     "🔴  RED TEAM INTEL  //  KILL CHAIN"
 ])
 
+# ── FILE UPLOADER HELPER ──────────────────────────────────────────────────
+def file_uploader_widget(key_suffix=""):
+    uploaded = st.file_uploader(
+        "or upload a file",
+        type=["py","js","php","ps1","bat","sh","txt","html","rb","go","cs","vbs","lua"],
+        key=f"upload_{key_suffix}",
+        label_visibility="collapsed"
+    )
+    if uploaded:
+        try:
+            return uploaded.read().decode("utf-8", errors="replace")
+        except Exception:
+            return None
+    return None
+
+# ── TIMELINE RENDERER ─────────────────────────────────────────────────────
+def render_timeline(timeline, accent="#00ff41"):
+    if not timeline:
+        return
+    steps = timeline[:8]  # cap at 8 steps for readability
+    n = len(steps)
+    cols = st.columns(n)
+    for i, (col, step) in enumerate(zip(cols, steps)):
+        with col:
+            tid = step.get("technique_id", "")
+            phase = step.get("phase", "")
+            action = step.get("action", "")
+            is_last = i == n - 1
+            connector = "" if is_last else "→"
+            st.markdown(f"""
+            <div style="text-align:center;position:relative">
+              <div style="width:38px;height:38px;border-radius:50%;background:{accent};
+                          color:#000;font-family:'Orbitron',monospace;font-size:0.85rem;
+                          font-weight:900;display:flex;align-items:center;justify-content:center;
+                          margin:0 auto;box-shadow:0 0 12px {accent}80">
+                {step.get('step', i+1)}
+              </div>
+              <div style="position:absolute;top:14px;right:-12px;color:{accent};
+                          font-size:1rem;font-weight:700">{connector}</div>
+              <div style="color:{accent};font-size:0.65rem;font-weight:700;
+                          letter-spacing:0.08em;margin-top:0.4rem;font-family:'Share Tech Mono',monospace">
+                {phase[:18]}
+              </div>
+              {"<div style='display:inline-block;background:#1f3fff22;color:#79b8ff;border:1px solid #1f3fff50;padding:0.08rem 0.3rem;font-size:0.6rem;font-family:JetBrains Mono,monospace;margin:0.2rem 0'>" + tid + "</div>" if tid else ""}
+              <div style="color:#00ff4155;font-size:0.68rem;line-height:1.4;margin-top:0.2rem">
+                {action[:60]}{"..." if len(action)>60 else ""}
+              </div>
+            </div>
+            """, unsafe_allow_html=True)
+
 # helper: score color
 def score_meta(score):
     if score>=8: return "#ff2020","rgba(255,32,32,0.6)","CRITICAL"
@@ -221,8 +272,10 @@ with tab1:
             if st.button(SAMPLES[key][0], key=f"s_{key}"):
                 st.session_state["m_sample"] = SAMPLES[key][1]
 
-    st.markdown('<div style="color:#00ff4150;font-size:0.68rem;letter-spacing:0.15em;margin:0.7rem 0 0.3rem">▸ TARGET CODE</div>', unsafe_allow_html=True)
-    code_input = st.text_area("c1", label_visibility="collapsed", value=st.session_state.get("m_sample",""),
+    st.markdown('<div style="color:#00ff4150;font-size:0.68rem;letter-spacing:0.15em;margin:0.7rem 0 0.3rem">▸ TARGET CODE &nbsp;·&nbsp; PASTE OR UPLOAD FILE</div>', unsafe_allow_html=True)
+    uploaded_code = file_uploader_widget("mal")
+    code_input = st.text_area("c1", label_visibility="collapsed",
+                               value=uploaded_code if uploaded_code else st.session_state.get("m_sample",""),
                                placeholder="// paste obfuscated or suspicious code...", height=160, key="code_in")
 
     if code_input.strip():
@@ -330,15 +383,29 @@ with tab1:
                     st.markdown(f'<div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;padding-bottom:0.7rem;border-bottom:1px solid #00ff4110"><div style="color:#000;background:#00ff41;min-width:1.25rem;height:1.25rem;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:700;flex-shrink:0;margin-top:0.1rem">{i:02d}</div><div style="color:#c8ffd4;font-size:0.8rem;line-height:1.5">{step}</div></div>', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
 
+            # Attack timeline
+            timeline = result.get("attack_timeline", [])
+            if timeline:
+                st.markdown('<div style="border-top:1px solid #00ff4115;margin:1rem 0 0.8rem"></div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="color:#00ff4150;font-size:0.65rem;letter-spacing:0.2em;margin-bottom:0.8rem">// ATTACK PROGRESSION TIMELINE</div>', unsafe_allow_html=True)
+                render_timeline(timeline, "#00ff41")
+
             # Export
             st.markdown('<div style="border-top:1px solid #00ff4115;margin:1rem 0 0.7rem"></div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="color:#00ff4150;font-size:0.65rem;letter-spacing:0.2em;margin-bottom:0.5rem">// EXPORT REPORT</div>', unsafe_allow_html=True)
             report = {"tool":"DarkDecoder","module":"Malware Scanner","timestamp":datetime.datetime.now().isoformat(),"sha256":sha256,"md5":hashlib.md5(code_input.encode()).hexdigest(),"analysis":result}
-            c1,c2=st.columns(2)
+            c1,c2,c3=st.columns(3)
             with c1:
                 st.download_button("[ ↓ JSON REPORT ]", json.dumps(report,indent=2), f"darkdecoder_{sha256[:8]}.json","application/json",key="dl1")
             with c2:
                 txt=f"DARKDECODER MALWARE SCAN\n{'='*40}\nTimestamp: {report['timestamp']}\nSHA256: {sha256}\nClassification: {result.get('classification','')}\nDanger Score: {score}/10\n\nIntent:\n{result.get('intent','')}\n\nSummary:\n{result.get('plain_english_summary','')}\n\nRemediation:\n"+"\n".join([f"{i+1}. {s}" for i,s in enumerate(result.get("remediation",[]))])
                 st.download_button("[ ↓ TXT REPORT ]", txt, f"darkdecoder_{sha256[:8]}.txt","text/plain",key="dl2")
+            with c3:
+                try:
+                    pdf_bytes = generate_malware_pdf(code_input, result)
+                    st.download_button("[ ↓ PDF REPORT ]", pdf_bytes, f"darkdecoder_{sha256[:8]}.pdf","application/pdf",key="dl3")
+                except Exception as e:
+                    st.caption(f"PDF error: {e}")
 
 # ═══════════════════════════════════════════════════════════════════════════
 # TAB 2 — AI THREAT ANALYZER
@@ -370,8 +437,10 @@ with tab2:
 
     col_inp, col_type = st.columns([4,1])
     with col_inp:
-        st.markdown('<div style="color:#00ff4150;font-size:0.68rem;letter-spacing:0.15em;margin:0.7rem 0 0.3rem">▸ INPUT TO ANALYZE</div>', unsafe_allow_html=True)
-        ai_input = st.text_area("ai_in", label_visibility="collapsed", value=st.session_state.get("ai_sample",""),
+        st.markdown('<div style="color:#00ff4150;font-size:0.68rem;letter-spacing:0.15em;margin:0.7rem 0 0.3rem">▸ INPUT TO ANALYZE &nbsp;·&nbsp; PASTE OR UPLOAD FILE</div>', unsafe_allow_html=True)
+        uploaded_ai = file_uploader_widget("ai")
+        ai_input = st.text_area("ai_in", label_visibility="collapsed",
+                                 value=uploaded_ai if uploaded_ai else st.session_state.get("ai_sample",""),
                                  placeholder="// paste prompt, dataset sample, system prompt, or model query log...", height=180, key="ai_code")
     with col_type:
         st.markdown('<div style="color:#00ff4150;font-size:0.68rem;letter-spacing:0.15em;margin:0.7rem 0 0.3rem">▸ INPUT TYPE</div>', unsafe_allow_html=True)
@@ -454,6 +523,20 @@ with tab2:
                     st.markdown(f'<div style="display:flex;gap:0.5rem;margin-bottom:0.7rem;padding-bottom:0.65rem;border-bottom:1px solid #00ff4110"><div style="color:#000;background:#00ff41;min-width:1.2rem;height:1.2rem;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0">{i:02d}</div><div style="color:#c8ffd4;font-size:0.78rem;line-height:1.5">{d}</div></div>', unsafe_allow_html=True)
                 st.markdown(f'<div style="margin-top:0.5rem;padding:0.5rem;background:#00007a15;border:1px solid #1f3fff30"><div style="color:#58a6ff;font-size:0.65rem;letter-spacing:0.1em;margin-bottom:0.2rem">TARGET SYSTEM</div><div style="color:#79b8ff;font-size:0.8rem">{result.get("target_system","Unknown")}</div></div></div>', unsafe_allow_html=True)
 
+            # PDF export for Tab 2
+            st.markdown('<div style="border-top:1px solid #00ff4115;margin:1rem 0 0.7rem"></div>', unsafe_allow_html=True)
+            st.markdown('<div style="color:#00ff4150;font-size:0.65rem;letter-spacing:0.2em;margin-bottom:0.5rem">// EXPORT REPORT</div>', unsafe_allow_html=True)
+            ec1, ec2 = st.columns(2)
+            with ec1:
+                report_ai = {"tool":"DarkDecoder","module":"AI Threat Analyzer","timestamp":datetime.datetime.now().isoformat(),"analysis":result}
+                st.download_button("[ ↓ JSON REPORT ]", json.dumps(report_ai,indent=2), "darkdecoder_atlas.json","application/json",key="ai_dl1")
+            with ec2:
+                try:
+                    pdf_ai = generate_ai_pdf(ai_input, result)
+                    st.download_button("[ ↓ PDF REPORT ]", pdf_ai, "darkdecoder_atlas.pdf","application/pdf",key="ai_dl2")
+                except Exception as e:
+                    st.caption(f"PDF error: {e}")
+
 # ═══════════════════════════════════════════════════════════════════════════
 # TAB 3 — RED TEAM INTEL
 # ═══════════════════════════════════════════════════════════════════════════
@@ -482,8 +565,10 @@ with tab3:
             if st.button(RT_SAMPLES[key][0], key=f"rt_{key}"):
                 st.session_state["rt_sample"] = RT_SAMPLES[key][1]
 
-    st.markdown('<div style="color:#ff404050;font-size:0.68rem;letter-spacing:0.15em;margin:0.7rem 0 0.3rem">▸ TARGET CODE FOR RED TEAM ANALYSIS</div>', unsafe_allow_html=True)
-    rt_input = st.text_area("rt_in", label_visibility="collapsed", value=st.session_state.get("rt_sample",""),
+    st.markdown('<div style="color:#ff404050;font-size:0.68rem;letter-spacing:0.15em;margin:0.7rem 0 0.3rem">▸ TARGET CODE &nbsp;·&nbsp; PASTE OR UPLOAD FILE</div>', unsafe_allow_html=True)
+    uploaded_rt = file_uploader_widget("rt")
+    rt_input = st.text_area("rt_in", label_visibility="collapsed",
+                             value=uploaded_rt if uploaded_rt else st.session_state.get("rt_sample",""),
                              placeholder="// paste code to analyze from offensive perspective...", height=180, key="rt_code")
 
     if st.button("[ INITIATE RED TEAM ANALYSIS ]", key="run_rt"):
@@ -581,6 +666,27 @@ with tab3:
                 for i,c in enumerate(result.get("countermeasures",[]),1):
                     st.markdown(f'<div style="display:flex;gap:0.5rem;margin-bottom:0.7rem;padding-bottom:0.65rem;border-bottom:1px solid #ff202015"><div style="color:#000;background:#ff4040;min-width:1.2rem;height:1.2rem;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0">{i:02d}</div><div style="color:#ffc8c8;font-size:0.78rem;line-height:1.5">{c}</div></div>', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
+
+            # Attack timeline
+            rt_timeline = result.get("attack_timeline", [])
+            if rt_timeline:
+                st.markdown('<div style="border-top:1px solid #ff202015;margin:1rem 0 0.8rem"></div>', unsafe_allow_html=True)
+                st.markdown('<div style="color:#ff404050;font-size:0.65rem;letter-spacing:0.2em;margin-bottom:0.8rem">// CAMPAIGN ATTACK TIMELINE</div>', unsafe_allow_html=True)
+                render_timeline(rt_timeline, "#ff4040")
+
+            # PDF export for Tab 3
+            st.markdown('<div style="border-top:1px solid #ff202015;margin:1rem 0 0.7rem"></div>', unsafe_allow_html=True)
+            st.markdown('<div style="color:#ff404050;font-size:0.65rem;letter-spacing:0.2em;margin-bottom:0.5rem">// EXPORT REPORT</div>', unsafe_allow_html=True)
+            rc1, rc2 = st.columns(2)
+            with rc1:
+                report_rt = {"tool":"DarkDecoder","module":"Red Team Intel","timestamp":datetime.datetime.now().isoformat(),"analysis":result}
+                st.download_button("[ ↓ JSON REPORT ]", json.dumps(report_rt,indent=2), "darkdecoder_redteam.json","application/json",key="rt_dl1")
+            with rc2:
+                try:
+                    pdf_rt = generate_redteam_pdf(rt_input, result)
+                    st.download_button("[ ↓ PDF REPORT ]", pdf_rt, "darkdecoder_redteam.pdf","application/pdf",key="rt_dl2")
+                except Exception as e:
+                    st.caption(f"PDF error: {e}")
 
 # ── FOOTER ────────────────────────────────────────────────────────────────
 st.markdown("""
