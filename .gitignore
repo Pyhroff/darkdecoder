@@ -29,3 +29,14 @@ Thumbs.db
 .idea/
 *.suo
 *.user
+
+# Working files
+*.mp4
+*.pptx
+*.txt
+screenshot.png
+video_b64.txt
+compress_video.py
+fix_slide6*.py
+rewrite_msgs.py
+take_screenshot.py
