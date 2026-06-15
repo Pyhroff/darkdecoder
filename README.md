@@ -10,6 +10,7 @@
 ![MITRE ATT&CK](https://img.shields.io/badge/MITRE-ATT%26CK-red?style=flat)
 ![MITRE ATLAS](https://img.shields.io/badge/MITRE-ATLAS-blue?style=flat)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat)
+![CI](https://github.com/Pyhroff/darkdecoder/actions/workflows/ci.yml/badge.svg)
 
 ---
 
