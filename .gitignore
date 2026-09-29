@@ -40,3 +40,6 @@ compress_video.py
 fix_slide6*.py
 rewrite_msgs.py
 take_screenshot.py
+_to_delete/
+*.pptx
+*.mp4
