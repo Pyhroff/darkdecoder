@@ -1,4 +1,4 @@
-# 💀 DarkDecoder
+# DarkDecoder
 
 **Dual-Framework Cyber Threat Intelligence Platform**
 
