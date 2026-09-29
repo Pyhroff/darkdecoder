@@ -16,17 +16,17 @@
 
 ## What Is DarkDecoder?
 
-DarkDecoder is the **only free tool** that combines two official cyber threat frameworks — **MITRE ATT&CK** for traditional malware and **MITRE ATLAS** for AI/ML adversarial threats — in a single platform.
+DarkDecoder is the **only free tool** that combines two official cyber threat frameworks - **MITRE ATT&CK** for traditional malware and **MITRE ATLAS** for AI/ML adversarial threats - in a single platform.
 
-Security analysts waste hours manually cross-referencing malicious code against threat databases. DarkDecoder does it in 20 seconds: paste code or a suspicious prompt, get a full breakdown — danger score, technique mappings, IOCs, kill chain, remediation steps, and exportable reports.
+Security analysts waste hours manually cross-referencing malicious code against threat databases. DarkDecoder does it in 20 seconds: paste code or a suspicious prompt, get a full breakdown - danger score, technique mappings, IOCs, kill chain, remediation steps, and exportable reports.
 
-**MITRE ATLAS coverage: 40+ techniques across 13 tactics** — including all LLM-specific techniques (prompt injection, jailbreak, meta-prompt extraction, plugin compromise, LLM data leakage).
+**MITRE ATLAS coverage: 40+ techniques across 13 tactics** - including all LLM-specific techniques (prompt injection, jailbreak, meta-prompt extraction, plugin compromise, LLM data leakage).
 
 ---
 
 ## Three Analysis Modules
 
-### Module 1 — Malware Scanner (MITRE ATT&CK)
+### Module 1 - Malware Scanner (MITRE ATT&CK)
 - Deobfuscates base64, hex, eval chains, string concatenation
 - Classifies malware type: Ransomware, Keylogger, Reverse Shell, Cryptominer, Webshell, and more
 - Danger score 1–10 with full justification
@@ -35,14 +35,14 @@ Security analysts waste hours manually cross-referencing malicious code against 
 - Plain English summary for non-technical stakeholders
 - Actionable remediation steps
 
-### Module 2 — AI Threat Analyzer (MITRE ATLAS v4)
+### Module 2 - AI Threat Analyzer (MITRE ATLAS v4)
 - **40+ ATLAS techniques** across all 13 tactics: Reconnaissance, Resource Development, Initial Access, ML Model Access, Execution, Persistence, ML Attack Staging, Defense Evasion, Discovery, Collection, Exfiltration, and Impact
 - Detects LLM-specific attacks: prompt injection (AML.T0051), jailbreak (AML.T0054), meta-prompt extraction (AML.T0058), plugin compromise (AML.T0057), LLM data leakage (AML.T0056)
 - Flags training data poisoning, backdoor insertion, model extraction, membership inference
 - Identifies ML supply chain attacks and surrogate model construction
 - Dual-Framework mode: run both ATLAS + ATT&CK on the same input when code targets ML infrastructure
 
-### Module 3 — Red Team Intel (ATT&CK Kill Chain)
+### Module 3 - Red Team Intel (ATT&CK Kill Chain)
 - Full 10-phase ATT&CK kill chain visualization
 - Weaponization score + stealth rating (1–10)
 - Privilege escalation level: None → Local → Admin → Domain Admin → SYSTEM/Root
@@ -57,12 +57,12 @@ Security analysts waste hours manually cross-referencing malicious code against 
 | Feature | Details |
 |---|---|
 | File Upload | .py .js .php .ps1 .sh .bat .rb .go .cs .vbs (up to 200 MB) |
-| Report Export | PDF · JSON · TXT — one click, all modules |
+| Report Export | PDF · JSON · TXT - one click, all modules |
 | Attack Timeline | Step-by-step progression with MITRE technique IDs |
 | Session History | All scans logged with timestamps in sidebar |
 | Hash Analysis | SHA256 + MD5 computed on every submission |
 | Built-in Samples | Pre-loaded demo payloads including GCG suffix + Crescendo escalation |
-| Zero Cost | Runs entirely on Groq's free tier — no credit card |
+| Zero Cost | Runs entirely on Groq's free tier - no credit card |
 | ATLAS Depth | 40+ techniques, 13 tactics, tactic name shown per technique |
 
 ---
@@ -71,7 +71,7 @@ Security analysts waste hours manually cross-referencing malicious code against 
 
 | Component | Technology |
 |---|---|
-| AI Engine | Groq API — Llama 3.3 70B Versatile |
+| AI Engine | Groq API - Llama 3.3 70B Versatile |
 | Threat Framework 1 | MITRE ATT&CK v14 |
 | Threat Framework 2 | MITRE ATLAS v4 (AI/ML adversarial threats) |
 | Backend | Python 3.10+ |
@@ -99,7 +99,7 @@ cp .env.example .env
 streamlit run app.py
 ```
 
-Get a **free Groq API key** at [console.groq.com](https://console.groq.com) — no credit card, 14,400 requests/day free tier.
+Get a **free Groq API key** at [console.groq.com](https://console.groq.com) - no credit card, 14,400 requests/day free tier.
 
 ---
 
@@ -142,22 +142,18 @@ darkdecoder/
 
 ---
 
-## Security Portfolio
+## Related projects
 
-DarkDecoder is part of a three-project AI security portfolio:
+DarkDecoder is one of three related AI-security projects:
 
 | Project | Role | Frameworks |
 |---|---|---|
-| **DarkDecoder** | Threat intelligence — what is the attack? | MITRE ATT&CK + ATLAS |
-| **[PromptStrike](https://github.com/Pyhroff/promptstrike)** | Active red teaming — can you jailbreak it? | PAIR · TAP · Crescendo · GCG |
-| **[SOC PARALLAX](https://github.com/Pyhroff/soc-parallax)** | Behavioral defense — detect the attacker | Neo4j · LangGraph · Ollama |
+| **DarkDecoder** | Threat intelligence - what is the attack? | MITRE ATT&CK + ATLAS |
+| **[PromptStrike](https://github.com/Pyhroff/promptstrike)** | Active red teaming - can you jailbreak it? | PAIR · TAP · Crescendo · GCG |
+| **[SOC PARALLAX](https://github.com/Pyhroff/soc-parallax)** | Behavioral defense - detect the attacker | Neo4j · LangGraph · Ollama |
 
 ---
 
 ## License
 
-MIT License — free to use, modify, and deploy.
-
----
-
-*DarkDecoder — Because malware doesn't explain itself.*
+MIT. See `LICENSE`.
