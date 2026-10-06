@@ -117,12 +117,12 @@ Get a **free Groq API key** at [console.groq.com](https://console.groq.com) - no
 
 | | DarkDecoder | VirusTotal | Traditional SIEMs |
 |---|---|---|---|
-| MITRE ATT&CK mapping | ✅ | Partial | ✅ (paid) |
-| MITRE ATLAS (AI threats) | ✅ 40+ techniques | ❌ | ❌ |
-| Red team kill chain | ✅ | ❌ | ❌ |
-| LLM-specific attacks | ✅ | ❌ | ❌ |
-| Free tier | ✅ | ✅ | ❌ |
-| Self-hostable | ✅ | ❌ | ❌ |
+| MITRE ATT&CK mapping |  | Partial |  (paid) |
+| MITRE ATLAS (AI threats) |  40+ techniques |  |  |
+| Red team kill chain |  |  |  |
+| LLM-specific attacks |  |  |  |
+| Free tier |  |  |  |
+| Self-hostable |  |  |  |
 
 ---
 
