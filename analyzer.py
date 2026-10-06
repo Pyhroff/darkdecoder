@@ -2,6 +2,7 @@ import os
 import json
 from groq import Groq
 from dotenv import load_dotenv
+from static_analysis import analyze_static
 
 load_dotenv()
 
