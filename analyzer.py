@@ -62,7 +62,29 @@ def _parse_json(raw: str) -> dict:
         raw = raw[:-3]
     return json.loads(raw.strip())
 
-def analyze_code(code: str) -> dict:
+
+
+# Deterministic IOC extraction complements the LLM and is intentionally local.
+_IOC_PATTERNS = {
+    "ips": r"(?<![\\d.])(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}(?![\\d.])",
+    "urls": r"https?://[^\\s\\"'<>]+",
+    "domains": r"(?<![@\\w.-])(?:[a-zA-Z0-9-]+\\.)+(?:com|net|org|io|dev|xyz|ru|cn|in|co|uk)(?![\\w.-])",
+    "file_paths": r"(?:[A-Za-z]:[\\\\/][^\\n\\r\\"']+|/(?:etc|tmp|var|home|opt|usr|root)/[^\\n\\r\\"']+)",
+}
+
+
+def _extract_local_iocs(code: str) -> dict:
+    """Extract high-confidence IOC candidates without sending anything externally."""
+    import re
+
+    result = {}
+    for kind, pattern in _IOC_PATTERNS.items():
+        result[kind] = sorted(set(re.findall(pattern, code)))[:100]
+    result["registry_keys"] = sorted(set(re.findall(r"(?:HKEY_[A-Z_]+|HKLM|HKCU)\\\\[^\\n\\r\\"']+", code)))[:100]
+    result["mutex_names"] = []
+    result["other"] = []
+    return result
+\n\ndef analyze_code(code: str) -> dict:
     code = _sanitize_input(code)
     last_error = None
 
