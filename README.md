@@ -2,7 +2,7 @@
 
 **Dual-Framework Cyber Threat Intelligence Platform**
 
-> Paste suspicious code or AI inputs. Get instant threat intelligence mapped to MITRE ATT&CK *and* MITRE ATLAS in under 20 seconds.
+> Paste suspicious code or AI inputs. Get structured threat-intelligence analysis mapped to MITRE ATT&CK and MITRE ATLAS.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.40-FF4B4B?style=flat&logo=streamlit&logoColor=white)
@@ -16,11 +16,11 @@
 
 ## What Is DarkDecoder?
 
-DarkDecoder is the **only free tool** that combines two official cyber threat frameworks - **MITRE ATT&CK** for traditional malware and **MITRE ATLAS** for AI/ML adversarial threats - in a single platform.
+DarkDecoder combines two threat-framework lenses in one analysis workflow: **MITRE ATT&CK** for conventional adversary behavior and **MITRE ATLAS** for AI/ML attack patterns.
 
-Security analysts waste hours manually cross-referencing malicious code against threat databases. DarkDecoder does it in 20 seconds: paste code or a suspicious prompt, get a full breakdown - danger score, technique mappings, IOCs, kill chain, remediation steps, and exportable reports.
+The current implementation uses an **embedded, versioned-in-code reference corpus**, rather than downloading the live MITRE catalogs at scan time. This makes analysis reproducible, but it also means framework coverage can become stale and should not be treated as a complete representation of the current ATT&CK or ATLAS knowledge bases.
 
-**MITRE ATLAS coverage: 40+ techniques across 13 tactics** - including all LLM-specific techniques (prompt injection, jailbreak, meta-prompt extraction, plugin compromise, LLM data leakage).
+The output combines model-assisted analysis with deterministic local static analysis and reporting: danger/risk scoring, technique mappings, IOC candidates, attack timelines, and remediation guidance. Results are analyst assistance, not authoritative threat attribution or certification.
 
 ---
 
@@ -35,8 +35,8 @@ Security analysts waste hours manually cross-referencing malicious code against 
 - Plain English summary for non-technical stakeholders
 - Actionable remediation steps
 
-### Module 2 - AI Threat Analyzer (MITRE ATLAS v4)
-- **40+ ATLAS techniques** across all 13 tactics: Reconnaissance, Resource Development, Initial Access, ML Model Access, Execution, Persistence, ML Attack Staging, Defense Evasion, Discovery, Collection, Exfiltration, and Impact
+### Module 2 - AI Threat Analyzer (embedded ATLAS reference corpus)
+- Maps against the ATLAS techniques encoded in `ai_analyzer.py`; this is a curated snapshot rather than the live ATLAS catalog
 - Detects LLM-specific attacks: prompt injection (AML.T0051), jailbreak (AML.T0054), meta-prompt extraction (AML.T0058), plugin compromise (AML.T0057), LLM data leakage (AML.T0056)
 - Flags training data poisoning, backdoor insertion, model extraction, membership inference
 - Identifies ML supply chain attacks and surrogate model construction
@@ -72,8 +72,8 @@ Security analysts waste hours manually cross-referencing malicious code against 
 | Component | Technology |
 |---|---|
 | AI Engine | Groq API - Llama 3.3 70B Versatile |
-| Threat Framework 1 | MITRE ATT&CK v14 |
-| Threat Framework 2 | MITRE ATLAS v4 (AI/ML adversarial threats) |
+| Threat Framework 1 | MITRE ATT&CK reference corpus (embedded) |
+| Threat Framework 2 | MITRE ATLAS reference corpus (embedded) |
 | Backend | Python 3.10+ |
 | Frontend | Streamlit |
 | PDF Generation | fpdf2 |
@@ -151,6 +151,22 @@ DarkDecoder is one of three related AI-security projects:
 | **DarkDecoder** | Threat intelligence - what is the attack? | MITRE ATT&CK + ATLAS |
 | **[PromptStrike](https://github.com/Pyhroff/promptstrike)** | Active red teaming - can you jailbreak it? | PAIR · TAP · Crescendo · GCG |
 | **[SOC PARALLAX](https://github.com/Pyhroff/soc-parallax)** | Behavioral defense - detect the attacker | Neo4j · LangGraph · Ollama |
+
+---
+
+## Interpretation and limitations
+
+DarkDecoder is an analyst-assistance prototype, not a malware verdict engine or threat-attribution authority.
+
+- LLM-generated classifications, scores, narratives, technique mappings, and CVSS vectors are hypotheses that should be validated by an analyst.
+- MITRE mappings come from the embedded reference corpus shipped with this repository; they are not guaranteed to match the current live ATT&CK or ATLAS catalogs.
+- Static analysis can miss dynamic behavior, generated code, native components, obfuscation, or behavior that only appears at runtime.
+- Regex/static IOC extraction produces candidates; presence in source does not prove that an indicator is active, malicious, or contacted.
+- A benign result does not prove that a sample is safe.
+- Results should not be used as proof of compromise, compliance, attribution, or absence of vulnerabilities.
+- Do not upload confidential source code, credentials, secrets, or regulated data to a third-party LLM provider.
+
+For authoritative framework identifiers and current technique definitions, consult the live MITRE catalogs before operational use.
 
 ---
 
