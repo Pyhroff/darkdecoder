@@ -27,8 +27,8 @@ Required JSON structure:
   "iocs": {
     "ips": [],
     "domains": [],
-    "urls": [],
-    "file_paths": [],
+    "urls": r'''https?://[^\s"']+''',
+    "file_paths": r'''(?:[A-Za-z]:[\\/][^\n\r"']+|/(?:etc|tmp|var|home|opt|usr|root)/[^\n\r"']+)''',
     "registry_keys": [],
     "mutex_names": [],
     "other": []
@@ -68,9 +68,9 @@ def _parse_json(raw: str) -> dict:
 # Deterministic IOC extraction complements the LLM and is intentionally local.
 _IOC_PATTERNS = {
     "ips": r"(?<![\\d.])(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}(?![\\d.])",
-    "urls": r"https?://[^\\s\\"'<>]+",
+    "urls": r'''https?://[^\s"']+''',
     "domains": r"(?<![@\\w.-])(?:[a-zA-Z0-9-]+\\.)+(?:com|net|org|io|dev|xyz|ru|cn|in|co|uk)(?![\\w.-])",
-    "file_paths": r"(?:[A-Za-z]:[\\\\/][^\\n\\r\\"']+|/(?:etc|tmp|var|home|opt|usr|root)/[^\\n\\r\\"']+)",
+    "file_paths": r'''(?:[A-Za-z]:[\\/][^\n\r"']+|/(?:etc|tmp|var|home|opt|usr|root)/[^\n\r"']+)''',
 }
 
 
@@ -81,7 +81,7 @@ def _extract_local_iocs(code: str) -> dict:
     result = {}
     for kind, pattern in _IOC_PATTERNS.items():
         result[kind] = sorted(set(re.findall(pattern, code)))[:100]
-    result["registry_keys"] = sorted(set(re.findall(r"(?:HKEY_[A-Z_]+|HKLM|HKCU)\\\\[^\\n\\r\\"']+", code)))[:100]
+    result["registry_keys"] = sorted(set(re.findall(r'''(?:HKEY_[A-Z_]+|HKLM|HKCU)\\[^\n\r"']+''', code)))[:100]
     result["mutex_names"] = []
     result["other"] = []
     return result
